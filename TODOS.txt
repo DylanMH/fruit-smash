@@ -1,0 +1,65 @@
+App Idea
+================================================================
+Web game where the user smashes fruit to get more points.
+
+User will click lit up areas on the fruit to smash it faster, the faster you smash the more points you get
+Different fruits will take longer to smash and smashing the bigger fruits faster will result in more points
+(point multiplier for bigger fruits)
+
+Routes
+================================================================
+Main
+- Login (display buttons to login using diffrent authorizers)
+- Play button(disabled until logged in)
+
+Play
+- Singleplayer (displays current highscore)
+- Multiplayer with an array or different option (ranked, unranked)
+
+Game
+- this will display the game board
+- if its pvp it will display both players board
+- dislay the score of the current game
+
+End Game
+- this will display the end game
+- show user their score for that game 
+- ui for if they beat their last high score
+- buttons for playing again or return to menu
+
+Game Logic
+================================================================
+Random fruits appear on a board. The user will need to click lit up areas(think gridshot, aimlabs) that randomly appear on the fruit in order to smash the fruit.
+The faster you smash the fruit, the more points the user will be rewarded.
+
+smash-bonus = random areas on the fruit that when clicked will smash the fruit faster
+
+- add fruit images
+- logic for smash-bonus
+- points and points multiplier for larger fruit logic
+- sound effects for smashing fruit and clicking points on the fruit
+- animation for smashing fruit
+- drop down effect for the next fruit(tetris effect)
+
+PvP Ideas
+================================================================
+- bonuses that fall from the top of board that users can click to give powerups
+
+Powerups (possible singleplayer implementation for score bonuses)
+- score multiplier for couple seconds
+- bonus bigger fruit
+- faster smashing(smash-bonuses appear faster)
+
+Powerdowns for opponent
+- next fruits fall slower
+- if smash-bonus is missed substract points
+- only drop small fruit for couple seconds
+
+Components
+- Main buttons (login, play, main menu...etc)
+- Displayed score
+- Game board
+
+
+
+
