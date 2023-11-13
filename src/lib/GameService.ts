@@ -4,11 +4,6 @@ import { writable, get } from 'svelte/store';
 // Type definitions and IFruit interface
 export type FruitType = 'small' | 'medium' | 'large';
 
-type Bonus = {
-	apply: () => void;
-	revert: () => void;
-};
-
 export interface IFruit {
 	id: string;
 	type: FruitType;
@@ -117,16 +112,15 @@ export class Fruit implements IFruit {
 export class GameService {
 	private fruits: Fruit[] = [];
 	private gameInterval?: ReturnType<typeof setInterval>;
-	public gameBoardHeight: number = 800; // The height of your game board
+	private gameBoardHeight: number = 800; // The height of your game board
 	static gameBoardWidth: number = 800; // The width of your game board
 	private _isGameOver = writable(false);
-	private globalFallSpeed = writable(0.5);
-	private activeBonuses: Record<string, Bonus> = {};
 
+	private lastDifficultyIncreaseScore = 0;
 	private score = writable(0);
 	private nextSpawnTime: number = 0;
-	private missedFruits: number = 0;
-	private difficultyLevel: number = 1;
+	private missedFruits = writable(0);
+	private difficultyLevel = writable(1);
 	private spawnRate: number = 500;
 
 	private bonusState = {
@@ -151,11 +145,19 @@ export class GameService {
 		return this._isGameOver;
 	}
 
+	public getMissedFruits() {
+		return this.missedFruits;
+	}
+
+	public getDifficultyLevel() {
+		return this.difficultyLevel;
+	}
+
 	private initGame() {
 		// Initialize or reset game state
 		this.fruits = [];
-		this.missedFruits = 0;
-		this.difficultyLevel = 1;
+		this.missedFruits.set(0);
+		this.difficultyLevel.set(1);
 		this.spawnRate = 2000;
 		this.nextSpawnTime = 0;
 		this.score.set(0);
@@ -246,15 +248,14 @@ export class GameService {
 	}
 
 	// method to increase the difficulty of the game based on users score (needs work)
-	public increaseDifficulty() {
+	public increaseLevel() {
 		const currentScore = get(this.score);
-		if (currentScore % 50 === 0 && currentScore !== 0) {
+
+		if (currentScore >= this.lastDifficultyIncreaseScore + 500) {
 			// every 50 points
-			this.difficultyLevel++;
+			this.difficultyLevel.update((prevLevel) => prevLevel + 1);
 			this.spawnRate *= 0.9; // increase spawn rate by 10%
-			this.fruits.forEach((fruit) => {
-				fruit.fallSpeed = Math.max(fruit.fallSpeed, this.difficultyLevel);
-			});
+			this.lastDifficultyIncreaseScore = currentScore;
 		}
 	}
 
@@ -263,15 +264,15 @@ export class GameService {
 			fruit.fall();
 			const hitBottom = fruit.y > this.gameBoardHeight;
 			if (hitBottom) {
-				this.missedFruits++;
+				this.missedFruits.update((missedFruits) => missedFruits + 1);
 			}
 			return !hitBottom;
 		});
 	}
 
 	private checkForMissedFruits() {
-		const maxMissedFruits = 5;
-		if (this.missedFruits >= maxMissedFruits) {
+		const maxMissedFruits = 10000000000;
+		if (get(this.missedFruits) >= maxMissedFruits) {
 			this.endGame();
 		}
 	}
@@ -286,6 +287,7 @@ export class GameService {
 		}
 		this.moveFruitsDown();
 		this.checkForMissedFruits();
+		this.increaseLevel();
 		if (this._isGameOver) {
 			return;
 		}

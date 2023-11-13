@@ -2,11 +2,19 @@
 	import { onMount } from 'svelte';
 	import { GameService } from '$lib/GameService';
 
+	import { StatsDisplay } from '$lib/components';
+
 	// Instantiate the game service
 	const gameService = new GameService();
 
 	// Reactive statements for fruits and to update gamestate
 	$: fruits = gameService.getFruits();
+
+	let difficultyLevel: number;
+	gameService.getDifficultyLevel().subscribe((value) => (difficultyLevel = value));
+
+	let missedFruits: number;
+	gameService.getMissedFruits().subscribe((value) => (missedFruits = value));
 
 	let gameOver: boolean = false;
 	gameService.gameOver().subscribe((value) => (gameOver = value));
@@ -35,9 +43,16 @@
 </script>
 
 {#if !gameOver}
-	<h1 class="text-2xl font-bold text-center text-green-500">Score:{score}</h1>
+	<div class="flex flex-row items-center justify-center">
+		<StatsDisplay text="Score: {score}" color="red" />
+		<StatsDisplay text="Missed fruits: {missedFruits}" color="green" />
+		<StatsDisplay text="Level: {difficultyLevel}" color="blue" />
+	</div>
 	<div class="flex justify-center items-center min-h-screen">
-		<div class="game-board overflow-hidden relative bg-green-200 w-[800px] h-[800px]">
+		<div
+			class="game-board overflow-hidden relative w-[800px] h-[800px] rounded-lg"
+			style="background-image: url(/images/boardbackground.png); background-size: cover;"
+		>
 			{#each fruits as fruit (fruit.id)}
 				<!-- svelte-ignore a11y-click-events-have-key-events -->
 				<!-- svelte-ignore a11y-no-static-element-interactions -->
