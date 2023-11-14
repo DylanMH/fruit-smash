@@ -58,7 +58,7 @@
 				<!-- svelte-ignore a11y-no-static-element-interactions -->
 				<div
 					class="fruit absolute"
-					style="top: {fruit.y}px; left: {fruit.x}px; width: {fruit.size}px; height: {fruit.size}px; background-image: url({fruit.imagePath});"
+					style="top: {fruit.y}px; left: {fruit.x}px; width: {fruit.size}px; height: {fruit.size}px; background-image: url({fruit.imagePath}); {fruit.specialEffect};		animation: rotate-{fruit.rotationDirection} {fruit.rotationSpeed}s linear infinite;"
 					on:click={() => gameService.smashFruit(fruit.id)}
 				/>
 			{/each}

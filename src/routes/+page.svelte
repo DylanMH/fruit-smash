@@ -7,7 +7,8 @@
 </script>
 
 <div class="flex flex-col items-center justify-center min-h-screen">
-	<h1 class="text-6xl font-bold text-red-400 mb-8">Fruit Smasher</h1>
+	<div class="flex flex-col items-center justify-center p-10" />
+	<h1 class="text-6xl font-bold text-green-500 mb-8">Fruit Smasher</h1>
 	{#if Object.keys(page).length < 0}
 		<h2 class="text-2xl font-semibold text-gray-700 mb-4">Login</h2>
 		<div class="space-y-4">

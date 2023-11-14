@@ -2,6 +2,24 @@
 @tailwind components;
 @tailwind utilities;
 
-* {
+body {
 	background-image: url(/images/mainbackground.png);
+	background-size: cover;
+}
+
+@keyframes rotate-cw {
+	from {
+		transform: rotate(0deg);
+	}
+	to {
+		transform: rotate(360deg);
+	}
+}
+@keyframes rotate-ccw {
+	from {
+		transform: rotate(0deg);
+	}
+	to {
+		transform: rotate(-360deg);
+	}
 }

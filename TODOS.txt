@@ -1,3 +1,20 @@
+TODOS Round 2
+-- Revamp Entire UI
+  - Custom Fonts?
+  - Custom Logo?
+-- Make sure the board scales properly for all devices
+* Add fruit spinning as it falls logic
+-- Add play again button / return to menu button on game over screen
+-- Redo bonus types
+  * Add indicator to fruit that it is special
+  - Add indicator to UI for what bonus was just applied
+    - Bonus icons? Countdown for when effect goes away?
+
+
+
+
+
+
 App Idea
 ================================================================
 Web game where the user smashes fruit to get more points.
@@ -34,12 +51,12 @@ The faster you smash the fruit, the more points the user will be rewarded.
 
 smash-bonus = random areas on the fruit that when clicked will smash the fruit faster
 
-- add fruit images
+* add fruit images
 - logic for smash-bonus
 - points and points multiplier for larger fruit logic
 - sound effects for smashing fruit and clicking points on the fruit
 - animation for smashing fruit
-- drop down effect for the next fruit(tetris effect)
+* drop down effect for the next fruit(tetris effect)
 
 PvP Ideas
 ================================================================
@@ -59,6 +76,8 @@ Components
 - Main buttons (login, play, main menu...etc)
 - Displayed score
 - Game board
+
+
 
 
 

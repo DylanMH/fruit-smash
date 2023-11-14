@@ -25,6 +25,9 @@ export class Fruit implements IFruit {
 	fallSpeed: number = 1;
 	originalFallSpeed: number;
 	originalClicksRequired: number;
+	specialEffect: string = '';
+	rotationDirection: 'cw' | 'ccw' = 'cw';
+	rotationSpeed: number = 0;
 
 	constructor(
 		public id: string,
@@ -40,6 +43,8 @@ export class Fruit implements IFruit {
 		this.x = this.randomXPosition();
 		this.originalClicksRequired = this.clicksRequired;
 		this.originalFallSpeed = this.fallSpeed;
+		this.rotationDirection = Math.random() > 0.5 ? 'cw' : 'ccw';
+		this.rotationSpeed = Math.random() * 2 * 10;
 	}
 
 	public applyFallSpeedModifier(modifier: number) {
@@ -62,7 +67,7 @@ export class Fruit implements IFruit {
 		const minSize = 100;
 		const maxSize = 300;
 		const minSpeed = 0.3;
-		const maxSpeed = 1.5;
+		const maxSpeed = 1.3;
 
 		const speed = minSpeed + ((size - minSize) / (maxSize - minSize)) * (maxSpeed - minSpeed);
 		return speed;
@@ -158,7 +163,7 @@ export class GameService {
 		this.fruits = [];
 		this.missedFruits.set(0);
 		this.difficultyLevel.set(1);
-		this.spawnRate = 2000;
+		this.spawnRate = 1200; // higher value = slower spawn rate
 		this.nextSpawnTime = 0;
 		this.score.set(0);
 		// Possibly set up initial fruits or other starting state
@@ -176,14 +181,14 @@ export class GameService {
 
 	// method to calculate what fruits are going to spawn based on the users score
 	private calculateFruitType(): FruitType {
-		const currentScore = get(this.score);
+		const currentLevel = get(this.difficultyLevel);
 		const types: FruitType[] = ['small'];
 
-		if (currentScore > 50) {
+		if (currentLevel >= 3) {
 			types.push('medium');
 		}
 
-		if (currentScore > 100) {
+		if (currentLevel >= 5) {
 			types.push('large');
 		}
 
@@ -196,7 +201,7 @@ export class GameService {
 		const clicksMap = {
 			small: { min: 1, max: 2 },
 			medium: { min: 3, max: 4 },
-			large: { min: 5, max: 7 }
+			large: { min: 5, max: 6 }
 		};
 		const range = clicksMap[type];
 
@@ -208,7 +213,7 @@ export class GameService {
 		const pointsMap = {
 			small: { min: 10, max: 20 },
 			medium: { min: 30, max: 50 },
-			large: { min: 50, max: 150 }
+			large: { min: 60, max: 150 }
 		};
 		const range = pointsMap[type];
 		return Math.floor(Math.random() * (range.max - range.min + 1) + range.min);
@@ -216,8 +221,10 @@ export class GameService {
 
 	// method to check if the fruit is a special fruit
 	private checkIfSpecial(fruit: Fruit): void {
-		if (Math.random() < 0.4) {
+		if (Math.random() < 0.1) {
+			// 10% chance of spawning a special fruit
 			fruit.isSpecial = true;
+			fruit.specialEffect = 'filter: hue-rotate(100deg); saturation: 100%; lightness: 100% '; // set the effect of bonus fruits
 			// assign a random bonus to the fruit
 			const bonusType = ['reduceFallSpeed', 'oneClickFruit'];
 			const randomBonus = bonusType[Math.floor(Math.random() * bonusType.length)];
@@ -239,7 +246,7 @@ export class GameService {
 
 		// apply active bonuses to the fruit
 		if (this.bonusState.reduceFallSpeedActive) {
-			fruit.applyFallSpeedModifier(0.8);
+			fruit.applyFallSpeedModifier(0.7);
 		}
 		if (this.bonusState.oneClickActive) {
 			fruit.applyOneClickModifier();
@@ -252,9 +259,9 @@ export class GameService {
 		const currentScore = get(this.score);
 
 		if (currentScore >= this.lastDifficultyIncreaseScore + 500) {
-			// every 50 points
+			// every "set amount" of points increase the difficulty
 			this.difficultyLevel.update((prevLevel) => prevLevel + 1);
-			this.spawnRate *= 0.9; // increase spawn rate by 10%
+			this.spawnRate *= 0.95; // increase the spawn rate
 			this.lastDifficultyIncreaseScore = currentScore;
 		}
 	}
@@ -271,7 +278,7 @@ export class GameService {
 	}
 
 	private checkForMissedFruits() {
-		const maxMissedFruits = 10000000000;
+		const maxMissedFruits = 5;
 		if (get(this.missedFruits) >= maxMissedFruits) {
 			this.endGame();
 		}
@@ -296,7 +303,6 @@ export class GameService {
 	public startGame() {
 		this.initGame();
 		this.gameInterval = setInterval(() => {
-			this.spawnFruit(); // Spawn fruits on an interval
 			this.updateGame();
 		}, this.spawnRate);
 	}
@@ -332,27 +338,26 @@ export class GameService {
 			const fruit = this.fruits[fruitIndex];
 			const smashed = fruit.smash();
 			if (smashed) {
+				if (fruit.isSpecial && fruit.bonusType) {
+					switch (fruit.bonusType) {
+						case 'reduceFallSpeed':
+							if (!this.bonusState.reduceFallSpeedActive) {
+								console.log('starting reduce fall speed');
+								this.fallSpeedModifier(0.8, 10000);
+								this.bonusState.reduceFallSpeedActive = true;
+							}
+							break;
+						case 'oneClickFruit':
+							if (!this.bonusState.oneClickActive) {
+								console.log('starting one click smash');
+								this.oneClickModifier(3000); // One click smash for 3 seconds
+								this.bonusState.oneClickActive = true;
+							}
+							break;
+					}
+				}
 				this.addScore(fruit.points);
 				this.fruits.splice(fruitIndex, 1);
-			}
-
-			if (fruit.isSpecial && fruit.bonusType) {
-				switch (fruit.bonusType) {
-					case 'reduceFallSpeed':
-						if (!this.bonusState.reduceFallSpeedActive) {
-							console.log('starting reduce fall speed');
-							this.fallSpeedModifier(0.8, 10000);
-							this.bonusState.reduceFallSpeedActive = true;
-						}
-						break;
-					case 'oneClickFruit':
-						if (!this.bonusState.oneClickActive) {
-							console.log('starting one click smash');
-							this.oneClickModifier(3000); // One click smash for 3 seconds
-							this.bonusState.oneClickActive = true;
-						}
-						break;
-				}
 			}
 		}
 	}
